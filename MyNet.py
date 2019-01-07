@@ -62,7 +62,7 @@ def numerical_gradient(f, X):
 # endregion
 
 class Net:
-    # region 网络
+    #region 网络
     # 这里初始化一个W,B网络
     def __init__(self, input_size, hidden_size, output_size, weight_init_std=0.01):
         self.network = {}
@@ -74,7 +74,7 @@ class Net:
             np.random.rand(hidden_size, output_size)
         self.network["B2"] = np.zeros(output_size)
 
-    # region 前向运算
+    # 前向运算
     def predict(self, x):
         w1, w2 = self.network["W1"], self.network["W2"]
         b1, b2 = self.network['B1'], self.network['B2']
@@ -87,13 +87,13 @@ class Net:
         return y
     # endregion
 
-    # region 损失函数 x:输入数据, t:监督数据
+    #region 损失函数 x:输入数据, t:监督数据
     def loss(self, x, t):
         y = self.predict(x)
         return Cross_Entropy_Error(y, t)
-    # endregion
+    #endregion
 
-    # region 正确率
+    #region 正确率
     def accuracy(self, x, t):
         y = self.predict(x)
         y = np.argmax(y, axis=1)
@@ -134,21 +134,27 @@ def _change_one_hot_label(X):
 
 # 测试网络
 def nettest():
-    net = Net(1, 1, 2)
-    x = np.arange(0,30,1)
-    x = x.reshape(x.size,1)
+    # 生成0~30之间的数字
+    x = np.arange(0,30,1).reshape(30,1)
+
+    # 计算它的 单/双 以onehot格式输出
     t =_change_one_hot_label(np.remainder(x,2))
+
+    # 准备神经网络
+    net = Net(1, 4, 2)
 
     # 训练前输出效果
     print(net.accuracy(x,t))
 
-    net.gradient_desent(x,t,0.01,100)
+    # 训练
+    net.gradient_desent(x,t,0.1,1000)
 
     # 训练后输出效果
     print(net.accuracy(x,t))
+
+    # 分类
     #y = net.predict(x)
     #print(y)
-
 
 if __name__ == "__main__":
     nettest()
