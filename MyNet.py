@@ -60,7 +60,6 @@ def _numerical_gradient_no_batch(f, x):
         x[idx] = tmp_val  # 还原值
     return grad
 
-
 def numerical_gradient(f, X):
     if X.ndim == 1:
         return _numerical_gradient_no_batch(f, X)
@@ -79,10 +78,10 @@ class Net:
     def __init__(self, input_size, hidden_size, output_size, weight_init_std=0.01):
         self.network = {}
         np.random.seed(int(time.time()))
-        self.network["W1"] = weight_init_std / np.random.rand(input_size, hidden_size)
+        self.network["W1"] = weight_init_std / np.random.randn(input_size, hidden_size)
         self.network["B1"] = np.zeros(hidden_size)
 
-        self.network["W2"] = weight_init_std / np.random.rand(hidden_size, output_size)
+        self.network["W2"] = weight_init_std / np.random.randn(hidden_size, output_size)
         self.network["B2"] = np.zeros(output_size)
 
     # 前向运算
@@ -94,26 +93,26 @@ class Net:
         z1 = Sigmoid(np.dot(x, w1)+b1)
 
         # 输出层
-        y = Softmax(np.dot(z1, w2)+b2)
+        y = Sigmoid(np.dot(z1, w2)+b2)
         return y
     # endregion
 
     #region 损失函数 x:输入数据, t:监督数据
     def loss(self, x, t):
         y = self.predict(x)
-        return Cross_Entropy_Error(y, t)
+        return Mean_Square_Error(y, t)
     #endregion
 
     #region 正确率
     def accuracy(self, x, t):
         y = self.predict(x)
-        y = np.argmax(y, axis=1)
-        t = np.argmax(t, axis=1)
+        # y = np.argmax(y, axis=1)
+        # t = np.argmax(t, axis=1)
         accuracy = np.sum(y == t) / float(x.shape[0])
         return accuracy
     # endregion
 
-    # region 梯度下降
+    #region 梯度下降
     # 梯度生成算法
     # x:输入数据, t:监督数据
     def numerical_gradient(self, x, t):
@@ -137,7 +136,7 @@ class Net:
         a1 = np.dot(x, W1) + b1
         z1 = Sigmoid(a1)
         a2 = np.dot(z1, W2) + b2
-        y = Softmax(a2)
+        y = Sigmoid(a2)
         
         # backward
         dy = (y - t) / batch_num
@@ -150,8 +149,9 @@ class Net:
         grads['B1'] = np.sum(dz1, axis=0)
 
         return grads
-    # endregion
+    #endregion
     
+    # 训练
     def gradient_desent(self, x, t, lr=1, step_num=100):
         for i in range(step_num):
             grad = self.gradient(x, t)
@@ -161,27 +161,32 @@ class Net:
             self.network['B2'] -= grad['B2']*lr
         pass
     
-def _change_one_hot_label(X):
-    T = np.zeros((X.size, 2))
+def _change_one_hot_label(X,len):
+    T = np.zeros((X.size, len))
     for idx, row in enumerate(T):
         row[X[idx]] = 1
-        
     return T
 
 # 测试网络
 def nettest():
-    # 生成0~30之间的数字
-    x = np.arange(0,1,0.001)
+    # 生成0~1之间的数字
+    x = np.arange(0,1,0.1)
     x = x.reshape(x.size,1)
 
     # 计算它的 单/双 以onehot格式输出
-    # t =_change_one_hot_label(np.remainder(x,2))
+    # t =_change_one_hot_label((np.remainder(x,2)==0).astype(np.int),2)
 
-    # 
-    t =_change_one_hot_label((x>0.05).astype(np.int))
+    # 判断是否大于0.05
+    # t =_change_one_hot_label((x>0.05).astype(np.int),2)
+
+    # 把数字分为4个区域
+    # t =_change_one_hot_label((x/0.25).astype(np.int),4)
+
+    # 写一个函数 f(x) = x/2 尝试拟合他
+    t=x/2
 
     # 准备神经网络
-    net = Net(1, 1, 2)
+    net = Net(1, 8, 1)
 
     # 训练前输出效果
     print(net.accuracy(x,t))
