@@ -47,12 +47,15 @@ def test1():
     print(XOR(1, 1))
 
 def test2():
-    x = np.arange(-5.0, 5.0, 0.1)
+    x = np.arange(-10, 10, 0.1)
     y1 = Perceptron(x)
     y2 = Sigmoid(x)
+    plt.plot(x, x,linestyle='--',label="x")
     plt.plot(x, y1,label="Perceptron")
-    plt.plot(x, y2,linestyle='--',label="Sigmoid")
-    plt.ylim(-0.1, 1.1)  # 指定y轴的范围
+    plt.plot(x, y2,label="Sigmoid")
+    plt.xlabel("X")
+    plt.ylabel("Y")
+    plt.ylim(-0.01, 1.01)  # 指定y轴的范围
     plt.legend()
     plt.show()
 
@@ -120,8 +123,45 @@ def test5():
     y=Softmax(a)
     print(y)
 
+
+def APerceptron(w,b,x):
+    y=np.sum(x*w)+b
+
+    # 激活函数
+    if(y>=0):
+        return 1
+    else:
+        return 0
+
+
+# 第一层
+XOR_W1_1 = np.array([0.5, 0.5])
+XOR_B1_1 = -0.7
+
+XOR_W1_2= np.array([-0.5, -0.5])
+XOR_B1_2 = 0.3
+
+# 第二层
+XOR_W2 = np.array([-0.5,-0.5])
+XOR_B2 = 0.3
+
+# 这是一个两层网络,输入层(2个神经元) + 输出层(1个神经元)
+def TwoLayerNet(x):
+    # 输入层第1神经元
+    a1=APerceptron(XOR_W1_1,XOR_B1_1,x )
+    # 输入层第2神经元
+    a2=APerceptron(XOR_W1_2,XOR_B1_2,x )
+    y=APerceptron(XOR_W2,XOR_B2,np.array([a1,a2]) )
+    return y
+
+def test0():
+    print (TwoLayerNet(np.array([0,0]) ))
+    print (TwoLayerNet(np.array([1,0]) ))
+    print (TwoLayerNet(np.array([1,1]) ))
+    print (TwoLayerNet(np.array([0,1]) ))
+
 if __name__ == "__main__":
     # x=np.array([-1.0,1.0,2.0])
     # x=Sigmoid(x)
     # print(x)
-    test5()
+    test2()

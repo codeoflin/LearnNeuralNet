@@ -171,9 +171,20 @@ def gradient_descent(f, init_x, lr=0.01, step_num=100):
         x -= lr * grad
     return x
 
+def myf(x):
+    return abs(x[0]-0.1)
+
 def test8():
-    init_x = np.array([-3.0, 4.0])
+    init_x = np.array([0.2,0.1])
     y=gradient_descent(fun2, init_x=init_x, lr=0.1, step_num=100)
     print(y)
+
+def test9():
+    init_x = np.array([0.0])
+    newx=gradient_descent(myf, init_x=init_x, lr=0.05, step_num=200)
+    print(newx)
+    print(myf(newx))
+
+
 if __name__ == "__main__":
-    test8()
+    test9()

@@ -28,7 +28,6 @@ def indentity_func(x):
     return x
 # endregion 激活函数
 
-
 # region 损失函数 参数:神经网络输出,正确数据
 # 平方差
 def Mean_Square_Error(y, t):
@@ -93,21 +92,21 @@ class Net:
         z1 = Sigmoid(np.dot(x, w1)+b1)
 
         # 输出层
-        y = Sigmoid(np.dot(z1, w2)+b2)
+        y = Softmax(np.dot(z1, w2)+b2)
         return y
     # endregion
 
     #region 损失函数 x:输入数据, t:监督数据
     def loss(self, x, t):
         y = self.predict(x)
-        return Mean_Square_Error(y, t)
+        return Cross_Entropy_Error(y, t)
     #endregion
 
     #region 正确率
     def accuracy(self, x, t):
         y = self.predict(x)
-        # y = np.argmax(y, axis=1)
-        # t = np.argmax(t, axis=1)
+        y = np.argmax(y, axis=1)
+        t = np.argmax(t, axis=1)
         accuracy = np.sum(y == t) / float(x.shape[0])
         return accuracy
     # endregion
@@ -116,7 +115,7 @@ class Net:
     # 梯度生成算法
     # x:输入数据, t:监督数据
     def numerical_gradient(self, x, t):
-        def loss_W(W): return self.loss(x, t)
+        loss_W = lambda W: self.loss(x, t)
         grads = {}
         grads['W1'] = numerical_gradient(loss_W, self.network['W1'])
         grads['B1'] = numerical_gradient(loss_W, self.network['B1'])
@@ -136,7 +135,7 @@ class Net:
         a1 = np.dot(x, W1) + b1
         z1 = Sigmoid(a1)
         a2 = np.dot(z1, W2) + b2
-        y = Sigmoid(a2)
+        y = Softmax(a2)
         
         # backward
         dy = (y - t) / batch_num
@@ -144,17 +143,16 @@ class Net:
         grads['B2'] = np.sum(dy, axis=0)
         
         da1 = np.dot(dy, W2.T)
-        dz1 = Sigmoid(a1) * da1
+        dz1 = Sigmoid_grad(a1) * da1
         grads['W1'] = np.dot(x.T, dz1)
         grads['B1'] = np.sum(dz1, axis=0)
-
         return grads
     #endregion
     
     # 训练
     def gradient_desent(self, x, t, lr=1, step_num=100):
         for i in range(step_num):
-            grad = self.gradient(x, t)
+            grad = self.numerical_gradient(x, t)
             self.network['W1'] -= grad['W1']*lr
             self.network['B1'] -= grad['B1']*lr
             self.network['W2'] -= grad['W2']*lr
@@ -170,7 +168,7 @@ def _change_one_hot_label(X,len):
 # 测试网络
 def nettest():
     # 生成0~1之间的数字
-    x = np.arange(0,1,0.1)
+    x = np.arange(0,1,0.01)
     x = x.reshape(x.size,1)
 
     # 计算它的 单/双 以onehot格式输出
@@ -179,23 +177,23 @@ def nettest():
     # 判断是否大于0.05
     # t =_change_one_hot_label((x>0.05).astype(np.int),2)
 
-    # 把数字分为4个区域
-    # t =_change_one_hot_label((x/0.25).astype(np.int),4)
+    # 把数字分为10个区域
+    t =_change_one_hot_label((x/0.1).astype(np.int),10)
 
-    # 写一个函数 f(x) = x/2 尝试拟合他
-    t=x/2
+    # 写一个函数 尝试拟合他
+    # t=x
 
     # 准备神经网络
-    net = Net(1, 8, 1)
+    net = Net(1, 8, 10)
 
     # 训练前输出效果
-    print(net.accuracy(x,t))
+    print(net.accuracy(x,t)) #0.0
 
     # 训练
-    net.gradient_desent(x,t,1,1000)
+    net.gradient_desent(x,t,0.1,10000)
 
     # 训练后输出效果
-    print(net.accuracy(x,t))
+    print(net.accuracy(x,t)) #0.0
 
     # 分类
     #y = net.predict(x)
